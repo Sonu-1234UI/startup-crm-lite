@@ -11,13 +11,16 @@ function App() {
     <ThemeProvider>
       <LeadProvider>
         <BrowserRouter>
-          <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-            <MobileHeader />
-            <Sidebar />
-            {/* pb-16 gives padding for the mobile bottom nav so content isn't hidden behind it */}
-            <main className="flex-grow h-[calc(100vh-3.5rem)] md:h-screen overflow-y-auto pb-16 md:pb-0">
-              <AppRoutes />
-            </main>
+          <div className="min-h-screen bg-gray-200 dark:bg-black transition-colors duration-200 flex justify-center">
+            {/* The main application container centered on ultra-wide screens */}
+            <div className="w-full max-w-[1440px] flex flex-col md:flex-row bg-gray-50 dark:bg-gray-900 shadow-2xl relative overflow-hidden">
+              <MobileHeader />
+              <Sidebar />
+              {/* pb-16 gives padding for the mobile bottom nav so content isn't hidden behind it */}
+              <main className="flex-grow h-[calc(100vh-3.5rem)] md:h-screen overflow-y-auto pb-16 md:pb-0">
+                <AppRoutes />
+              </main>
+            </div>
           </div>
         </BrowserRouter>
       </LeadProvider>
