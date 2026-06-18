@@ -1,57 +1,81 @@
-// Import React library
 import React from 'react';
-// Import NavLink from react-router-dom for navigation with active state styling
 import { NavLink } from 'react-router-dom';
+import { BarChart3, LayoutDashboard, Users } from 'lucide-react';
+import DarkModeToggle from './common/DarkModeToggle';
 
-// Define the Sidebar functional component
 const Sidebar = () => {
-  // Define a helper function to determine the classes for each navigation link based on its active state
-  // It receives an object with an isActive boolean property from NavLink
   const getNavLinkClass = ({ isActive }) => {
-    // Base classes applied to all links, now block-level for a vertical list
-    const baseClasses = "block px-4 py-3 rounded-md transition-colors duration-200 font-medium mb-2 ";
-    // If active, apply highlighting styles (blue background and text). If not, apply hover styles.
-    return baseClasses + (isActive ? "bg-blue-100 text-blue-700" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900");
+    // Mobile: vertical layout (icon top, text bottom). Tablet+: horizontal layout.
+    const base = 'flex md:flex-row flex-col items-center gap-1 md:gap-3 px-2 py-2 md:px-4 md:py-2.5 md:rounded-xl font-medium text-[10px] md:text-sm transition-all duration-200 md:mb-1 w-full justify-center md:justify-start min-h-[44px] md:min-h-0 ';
+    return base + (isActive
+      ? 'text-blue-700 dark:text-blue-400 md:bg-blue-50 md:dark:bg-blue-900/30'
+      : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 md:hover:bg-gray-100 md:dark:hover:bg-gray-800'
+    );
   };
 
-  // Return the JSX to render
   return (
-    // Aside element serving as the semantic container for the sidebar, with fixed width and full height
-    <aside className="w-64 bg-white shadow-lg flex flex-col sticky top-0 h-screen">
-      {/* Container for branding/logo text */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="text-2xl font-bold text-gray-800">
-          {/* Startup CRM Lite title */}
-          Startup CRM
+    <>
+      {/* Mobile: Bottom Navigation Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50 pb-safe transition-colors duration-200">
+        <div className="flex justify-around items-center px-2 py-1">
+          <NavLink to="/" className={getNavLinkClass} end>
+            <LayoutDashboard className="w-5 h-5" />
+            <span>Dashboard</span>
+          </NavLink>
+          <NavLink to="/leads" className={getNavLinkClass}>
+            <Users className="w-5 h-5" />
+            <span>Leads</span>
+          </NavLink>
+          <NavLink to="/analytics" className={getNavLinkClass}>
+            <BarChart3 className="w-5 h-5" />
+            <span>Analytics</span>
+          </NavLink>
         </div>
-      </div>
-      
-      {/* Container for the navigation links using flexbox for vertical layout */}
-      <div className="flex-grow flex flex-col p-4">
-        {/* NavLink for the Dashboard route (/) */}
-        <NavLink to="/" className={getNavLinkClass}>
-          {/* Text for the Dashboard link */}
-          Dashboard
-        </NavLink>
-        {/* NavLink for the Lead Management route (/leads) */}
-        <NavLink to="/leads" className={getNavLinkClass}>
-          {/* Text for the Leads link */}
-          Leads
-        </NavLink>
-        {/* NavLink for the Analytics route (/analytics) */}
-        <NavLink to="/analytics" className={getNavLinkClass}>
-          {/* Text for the Analytics link */}
-          Analytics
-        </NavLink>
-      </div>
-      
-      {/* Optional bottom section for settings or user profile could go here */}
-      <div className="p-4 border-t border-gray-100 text-sm text-gray-500 text-center">
-        v1.0 Lite
-      </div>
-    </aside>
+      </nav>
+
+      {/* Tablet/Desktop: Left Sidebar */}
+      <aside className="hidden md:flex w-20 lg:w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex-col sticky top-0 h-screen shadow-sm transition-all duration-300">
+        {/* Logo */}
+        <div className="p-4 lg:p-6 border-b border-gray-100 dark:border-gray-800 flex justify-center lg:justify-start">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+              <BarChart3 className="w-4.5 h-4.5 text-white" />
+            </div>
+            <div className="hidden lg:block">
+              <p className="text-base font-bold text-gray-900 dark:text-white leading-tight">Startup CRM</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Lite Edition</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-grow flex flex-col p-2 lg:p-4 mt-2">
+          <p className="hidden lg:block text-xs font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-wider px-4 mb-2">Menu</p>
+          <NavLink to="/" className={getNavLinkClass} end>
+            <LayoutDashboard className="w-5 h-5 lg:w-4.5 lg:h-4.5" />
+            <span className="hidden lg:inline">Dashboard</span>
+          </NavLink>
+          <NavLink to="/leads" className={getNavLinkClass}>
+            <Users className="w-5 h-5 lg:w-4.5 lg:h-4.5" />
+            <span className="hidden lg:inline">Leads</span>
+          </NavLink>
+          <NavLink to="/analytics" className={getNavLinkClass}>
+            <BarChart3 className="w-5 h-5 lg:w-4.5 lg:h-4.5" />
+            <span className="hidden lg:inline">Analytics</span>
+          </NavLink>
+        </nav>
+
+        {/* Footer: Dark Mode Toggle */}
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex flex-col items-center lg:items-stretch">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-3 lg:px-2">
+            <span className="hidden lg:inline text-sm text-gray-500 dark:text-gray-400 font-medium">Dark Mode</span>
+            <DarkModeToggle />
+          </div>
+          <p className="hidden lg:block text-xs text-gray-400 dark:text-gray-600 text-center mt-3">v1.0 Lite</p>
+        </div>
+      </aside>
+    </>
   );
 };
 
-// Export the Sidebar component
 export default Sidebar;

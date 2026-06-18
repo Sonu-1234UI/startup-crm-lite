@@ -1,82 +1,50 @@
 import React from 'react';
 import { Users, DollarSign, Activity, TrendingUp } from 'lucide-react';
+import { useLeads } from '../context/LeadContext';
 import StatsCard from '../components/dashboard/StatsCard';
 import PipelineOverview from '../components/dashboard/PipelineOverview';
 import RecentLeads from '../components/dashboard/RecentLeads';
 import QuickActions from '../components/dashboard/QuickActions';
 
-/**
- * Main Dashboard page assembling various dashboard components.
- * 
- * @returns {JSX.Element}
- */
 const Dashboard = () => {
-  // Sample data for Phase 8
-  const sampleLeads = [
-    { id: 1, name: 'Alice Freeman', company: 'TechNova', status: 'New', dateAdded: '2023-10-25T10:00:00Z' },
-    { id: 2, name: 'Bob Smith', company: 'BuildCorp', status: 'Contacted', dateAdded: '2023-10-24T14:30:00Z' },
-    { id: 3, name: 'Charlie Davis', company: 'DesignCo', status: 'Qualified', dateAdded: '2023-10-23T09:15:00Z' },
-    { id: 4, name: 'Diana Prince', company: 'Amazonia', status: 'Lost', dateAdded: '2023-10-22T16:45:00Z' },
-    { id: 5, name: 'Evan Wright', company: 'FlightWorks', status: 'New', dateAdded: '2023-10-21T11:20:00Z' },
-    { id: 6, name: 'Fiona Gallagher', company: 'Shameless Inc', status: 'Qualified', dateAdded: '2023-10-20T08:00:00Z' }
-  ];
+  const { leads } = useLeads();
+
+  const totalLeads = leads.length;
+  const wonLeads = leads.filter(l => l.status === 'Won').length;
+  const conversionRate = totalLeads > 0 ? ((wonLeads / totalLeads) * 100).toFixed(1) : 0;
+  const pipelineValue = leads
+    .filter(l => l.status !== 'Won' && l.status !== 'Lost')
+    .reduce((sum, l) => sum + (l.value || 0), 0);
+  const wonRevenue = leads.filter(l => l.status === 'Won').reduce((sum, l) => sum + (l.value || 0), 0);
+
+  const formatCurrency = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(v);
 
   return (
-    <div className="bg-slate-50 p-4 md:p-8">
+    <div className="bg-slate-50 dark:bg-gray-900 min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        
         {/* Page Header */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-          <p className="text-slate-500 mt-1">Welcome back, here's what's happening with your leads today.</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
+          <p className="text-slate-500 dark:text-gray-400 mt-1">Welcome back — here's what's happening with your leads today.</p>
         </div>
 
-        {/* Stats Grid: 1 col mobile, 2 col tablet, 4 col desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatsCard 
-            title="Total Leads" 
-            value="1,248" 
-            icon={Users} 
-            change="+12.5%" 
-            color="bg-blue-100 text-blue-600" 
-          />
-          <StatsCard 
-            title="Qualified Leads" 
-            value="342" 
-            icon={TrendingUp} 
-            change="+5.2%" 
-            color="bg-green-100 text-green-600" 
-          />
-          <StatsCard 
-            title="Conversion Rate" 
-            value="24.8%" 
-            icon={Activity} 
-            change="-1.2%" 
-            color="bg-amber-100 text-amber-600" 
-          />
-          <StatsCard 
-            title="Expected Revenue" 
-            value="$45,200" 
-            icon={DollarSign} 
-            change="+18.4%" 
-            color="bg-indigo-100 text-indigo-600" 
-          />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatsCard title="Total Leads" value={totalLeads} icon={Users} change="+12.5%" color="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" />
+          <StatsCard title="Won Leads" value={wonLeads} icon={TrendingUp} change="+5.2%" color="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" />
+          <StatsCard title="Conversion Rate" value={`${conversionRate}%`} icon={Activity} change="-1.2%" color="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400" />
+          <StatsCard title="Won Revenue" value={formatCurrency(wonRevenue)} icon={DollarSign} change="+18.4%" color="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400" />
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Left Column (takes 2/3 width on desktop) */}
           <div className="lg:col-span-2 space-y-6">
-            <PipelineOverview leads={sampleLeads} />
-            <RecentLeads leads={sampleLeads} />
+            <PipelineOverview leads={leads} />
+            <RecentLeads leads={leads} />
           </div>
-          
-          {/* Right Column (takes 1/3 width on desktop) */}
           <div className="space-y-6">
             <QuickActions />
           </div>
-          
         </div>
       </div>
     </div>

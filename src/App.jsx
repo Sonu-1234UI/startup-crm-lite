@@ -1,31 +1,28 @@
-// Import React library
 import React from 'react';
-// Import BrowserRouter from react-router-dom to enable routing functionality
 import { BrowserRouter } from 'react-router-dom';
-// Import the Sidebar component to be displayed on the left side
+import { LeadProvider } from './context/LeadContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/Sidebar';
-// Import the centralized route definitions
+import MobileHeader from './components/MobileHeader';
 import AppRoutes from './routes';
 
-// Define the main App functional component
 function App() {
-  // Return the JSX to render
   return (
-    // Wrap the entire application in BrowserRouter to provide routing context
-    <BrowserRouter>
-      {/* Main container for the application layout, using flex for a sidebar layout */}
-      <div className="min-h-screen flex bg-gray-50">
-        {/* Render the Sidebar component which will be visible on the left across all routes */}
-        <Sidebar />
-        {/* Main content area that will expand to fill remaining horizontal space */}
-        <main className="flex-grow h-screen overflow-y-auto">
-          {/* Render the route definitions which determine what component to show based on the URL */}
-          <AppRoutes />
-        </main>
-      </div>
-    </BrowserRouter>
+    <ThemeProvider>
+      <LeadProvider>
+        <BrowserRouter>
+          <div className="min-h-screen flex flex-col md:flex-row bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+            <MobileHeader />
+            <Sidebar />
+            {/* pb-16 gives padding for the mobile bottom nav so content isn't hidden behind it */}
+            <main className="flex-grow h-[calc(100vh-3.5rem)] md:h-screen overflow-y-auto pb-16 md:pb-0">
+              <AppRoutes />
+            </main>
+          </div>
+        </BrowserRouter>
+      </LeadProvider>
+    </ThemeProvider>
   );
 }
 
-// Export the App component as the default export
 export default App;
