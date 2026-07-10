@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, LayoutGrid, List } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 import { useLeads } from '../context/LeadContext';
 import LeadTable from '../components/leads/LeadTable';
 import LeadCard from '../components/leads/LeadCard';
 import LeadForm from '../components/leads/LeadForm';
 
 const Leads = () => {
-  const { leads, addLead, updateLead, deleteLead } = useLeads();
+  const { leads, addLead, updateLead, deleteLead, fetchLeads, isLoading } = useLeads();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [viewMode, setViewMode] = useState('table');
+
+  // Fetch leads from the API when the page mounts.
+  useEffect(() => {
+    fetchLeads({ sortBy: 'createdAt', sortOrder: 'desc' });
+  }, [fetchLeads]);
 
   const handleOpenModal = (lead = null) => {
     setSelectedLead(lead);
@@ -22,21 +27,21 @@ const Leads = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (formData) => {
+  const handleSubmit = async (formData) => {
     if (selectedLead) {
-      updateLead(selectedLead.id, formData);
-      toast.success('Lead updated successfully!');
+      // Use _id (MongoDB ObjectId) instead of the old localStorage 'id'.
+      const result = await updateLead(selectedLead._id, formData);
+      if (result) handleCloseModal(); // Only close if API call succeeded (toast shown in context)
     } else {
-      addLead(formData);
-      toast.success('Lead created successfully!');
+      const result = await addLead(formData);
+      if (result) handleCloseModal();
     }
-    handleCloseModal();
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
-      deleteLead(id);
-      toast.error('Lead deleted', { icon: '🗑️' });
+      // deleteLead now calls the API; toast is shown inside LeadContext.
+      await deleteLead(id);
     }
   };
 
@@ -88,7 +93,8 @@ const Leads = () => {
           {/* Card grid — Default on Mobile. Shown on Tablet if viewMode=grid. Hidden on Desktop. */}
           <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 lg:hidden ${viewMode === 'table' ? 'md:hidden' : ''}`}>
             {leads.map(lead => (
-              <LeadCard key={lead.id} lead={lead} onEdit={handleOpenModal} onDelete={handleDelete} />
+              // MongoDB documents use _id; fall back to id for legacy data.
+              <LeadCard key={lead._id || lead.id} lead={lead} onEdit={handleOpenModal} onDelete={handleDelete} />
             ))}
             {leads.length === 0 && (
               <div className="col-span-full bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-slate-200 dark:border-gray-700 p-8 text-center text-slate-500 dark:text-gray-400">

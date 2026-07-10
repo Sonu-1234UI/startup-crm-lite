@@ -1,9 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BarChart3, LayoutDashboard, Users } from 'lucide-react';
+import { BarChart3, LayoutDashboard, Users, LogOut } from 'lucide-react';
 import DarkModeToggle from './common/DarkModeToggle';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Sidebar = () => {
+  // Destructure user and logout from AuthContext.
+  // If Sidebar is rendered on an auth page (which it isn't — AppShell prevents that),
+  // useAuth would throw; but AppShell already hides Sidebar on /login and /register.
+  const { user, logout } = useAuth();
+
   const getNavLinkClass = ({ isActive }) => {
     // Mobile: vertical layout (icon top, text bottom). Tablet+: horizontal layout.
     const base = 'flex md:flex-row flex-col items-center gap-1 md:gap-3 px-2 py-2 md:px-4 md:py-2.5 md:rounded-xl font-medium text-[10px] md:text-sm transition-all duration-200 md:mb-1 w-full justify-center md:justify-start min-h-[44px] md:min-h-0 ';
@@ -65,13 +71,41 @@ const Sidebar = () => {
           </NavLink>
         </nav>
 
-        {/* Footer: Dark Mode Toggle */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex flex-col items-center lg:items-stretch">
+        {/* Footer: User info + Dark Mode + Logout */}
+        <div className="p-4 border-t border-gray-100 dark:border-gray-800 flex flex-col items-center lg:items-stretch gap-3">
+
+          {/* User avatar + name/email — visible only on wide sidebar */}
+          {user && (
+            <div className="hidden lg:flex items-center gap-2 px-2">
+              <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                  {user.name?.[0]?.toUpperCase() || '?'}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{user.name}</p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Dark mode toggle */}
           <div className="flex flex-col lg:flex-row items-center justify-between gap-3 lg:px-2">
             <span className="hidden lg:inline text-sm text-gray-500 dark:text-gray-400 font-medium">Dark Mode</span>
             <DarkModeToggle />
           </div>
-          <p className="hidden lg:block text-xs text-gray-400 dark:text-gray-600 text-center mt-3">v1.0 Lite</p>
+
+          {/* Logout button */}
+          <button
+            onClick={logout}
+            className="flex items-center justify-center lg:justify-start gap-2 w-full px-2 py-2 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            aria-label="Log out"
+          >
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden lg:inline font-medium">Log out</span>
+          </button>
+
+          <p className="hidden lg:block text-xs text-gray-400 dark:text-gray-600 text-center">v1.0 Lite</p>
         </div>
       </aside>
     </>

@@ -29,7 +29,8 @@ const LeadTable = ({ leads, onEdit, onDelete }) => {
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-slate-200 dark:divide-gray-700">
             {leads.map((lead) => (
-              <tr key={lead.id} className="hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors">
+              // Use _id (MongoDB) with fallback to id for legacy sample data
+              <tr key={lead._id || lead.id} className="hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-slate-900 dark:text-white">{lead.name}</div>
                   {lead.owner && <div className="text-xs text-slate-400 dark:text-gray-500 mt-0.5">{lead.owner}</div>}
@@ -54,7 +55,7 @@ const LeadTable = ({ leads, onEdit, onDelete }) => {
                       aria-label={`Edit ${lead.name}`}>
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => onDelete(lead.id)}
+                    <button onClick={() => onDelete(lead._id || lead.id)}
                       className="p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                       aria-label={`Delete ${lead.name}`}>
                       <Trash2 className="w-4 h-4" />
