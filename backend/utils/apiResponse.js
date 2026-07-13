@@ -92,14 +92,16 @@ export const errorResponse = (res, message = 'An error occurred', statusCode = 5
  * Use this for any endpoint that returns a list that supports pagination
  * (e.g. `GET /api/leads?page=2&limit=10`).
  *
- * The `pages` field in the pagination envelope is the total number of pages
- * calculated server-side so the frontend never has to compute it.
+ * The `pages`, `hasNext`, and `hasPrev` fields are computed server-side so
+ * the frontend never has to recalculate them.
  *
- * @param {import('express').Response} res   - Express response object.
- * @param {Array}                      data  - The current page of results.
- * @param {number}                     total - Total number of documents matching the query.
- * @param {number}                     page  - Current page number (1-indexed).
- * @param {number}                     limit - Number of items per page.
+ * @param {import('express').Response} res     - Express response object.
+ * @param {Array}                      data    - The current page of results.
+ * @param {number}                     total   - Total documents matching the query.
+ * @param {number}                     page    - Current page number (1-indexed).
+ * @param {number}                     limit   - Number of items per page.
+ * @param {Object}                     [extras={}] - Additional pagination fields to merge
+ *                                               into the envelope (e.g. { hasNext, hasPrev }).
  * @returns {import('express').Response} The Express response.
  *
  * @example
@@ -107,14 +109,19 @@ export const errorResponse = (res, message = 'An error occurred', statusCode = 5
  *   Lead.find(filter).skip(skip).limit(limit),
  *   Lead.countDocuments(filter),
  * ]);
- * return paginatedResponse(res, leads, total, page, limit);
- * // → 200 {
+ * const pages   = Math.ceil(total / limit) || 1;
+ * return paginatedResponse(res, leads, total, page, limit, {
+ *   hasNext: page < pages,
+ *   hasPrev: page > 1,
+ * });
+ * // -> 200 {
  * //     success: true,
  * //     data: [...],
- * //     pagination: { total: 87, page: 2, limit: 10, pages: 9 }
+ * //     pagination: { total: 87, page: 2, limit: 10, pages: 9, hasNext: true, hasPrev: true }
  * //   }
  */
-export const paginatedResponse = (res, data, total, page, limit) => {
+export const paginatedResponse = (res, data, total, page, limit, extras = {}) => {
+  const pages = Math.ceil(total / limit) || 1;
   return res.status(200).json({
     success: true,
     data,
@@ -126,7 +133,11 @@ export const paginatedResponse = (res, data, total, page, limit) => {
       /** Items returned per page. */
       limit,
       /** Total number of pages — computed here so the client doesn't have to. */
-      pages: Math.ceil(total / limit),
+      pages,
+      /** Convenience flag: true when a next page exists. */
+      hasNext: extras.hasNext ?? page < pages,
+      /** Convenience flag: true when a previous page exists. */
+      hasPrev: extras.hasPrev ?? page > 1,
     },
   });
 };

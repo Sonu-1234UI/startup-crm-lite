@@ -8,14 +8,15 @@
  * at the top so every handler below requires a valid Bearer JWT.
  *
  * Endpoint map:
- *   GET    /api/leads                  → getLeads          (paginated, filterable list)
- *   POST   /api/leads                  → createLead        (create new lead)
- *   GET    /api/leads/stats            → getLeadStats      (pipeline stats for dashboard)
- *   GET    /api/leads/stats/monthly    → getMonthlyStats   (last-6-months chart data)
- *   GET    /api/leads/:id              → getLeadById       (single lead by ID)
- *   PUT    /api/leads/:id              → updateLead        (full update)
- *   PATCH  /api/leads/:id/status       → updateLeadStatus  (status-only quick update)
- *   DELETE /api/leads/:id              → deleteLead        (permanent delete)
+ *   GET    /api/leads                  -> getLeads          (paginated, filterable list)
+ *   POST   /api/leads                  -> createLead        (create new lead)
+ *   GET    /api/leads/search           -> searchLeads       (autocomplete quick-search)
+ *   GET    /api/leads/stats            -> getLeadStats      (pipeline stats for dashboard)
+ *   GET    /api/leads/stats/monthly    -> getMonthlyStats   (last-6-months chart data)
+ *   GET    /api/leads/:id              -> getLeadById       (single lead by ID)
+ *   PUT    /api/leads/:id              -> updateLead        (full update)
+ *   PATCH  /api/leads/:id/status       -> updateLeadStatus  (status-only quick update)
+ *   DELETE /api/leads/:id              -> deleteLead        (permanent delete)
  *
  * Validation strategy:
  *   - createLeadValidation  : strict — all required fields must be present and valid.
@@ -31,6 +32,7 @@ import protect   from '../middleware/auth.js';
 import validate  from '../middleware/validate.js';
 import {
   getLeads,
+  searchLeads,
   createLead,
   getLeadById,
   updateLead,
@@ -242,10 +244,24 @@ router.get('/stats', getLeadStats);
  * Returns month-by-month lead creation and win counts for the last 6 months.
  * Used by the Analytics page BarChart and LineChart components.
  *
- * Output: Array of 6 objects: [{ month: 'Jan', year: 2026, total: 5, won: 2 }, ...]
+ * Output: Array of 6 objects: [{ month: 'Jan 2025', year: 2025, total: 5, won: 2, lost: 1, conversionRate: 40.0 }, ...]
  * Returns: 200 successResponse with monthly stats array.
  */
 router.get('/stats/monthly', getMonthlyStats);
+
+/**
+ * GET /api/leads/search?q=ali&limit=5
+ * Quick autocomplete search — returns only _id, name, company, email, status.
+ * Intended for React SearchBar debounce; results are capped at 5 (max 10).
+ * An empty `q` param returns [] without hitting the DB.
+ *
+ * Query params:
+ *   q     {string}  - Search term (case-insensitive, matches name/company/email)
+ *   limit {number}  - Max results (default 5, capped at 10)
+ *
+ * Returns: 200 successResponse with array of minimal lead objects.
+ */
+router.get('/search', searchLeads);
 
 // ---------------------------------------------------------------------------
 // Single-resource routes (require valid :id)

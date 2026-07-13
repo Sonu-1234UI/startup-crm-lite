@@ -250,6 +250,51 @@ leadSchema.index({ owner: 1, status: 1 });
  */
 leadSchema.index({ email: 1 });
 
+/**
+ * Compound index on `owner` + `createdAt`.
+ *
+ * Optimises date-range queries and chronological aggregations:
+ *  - getLeads with dateFrom / dateTo filters
+ *  - getLeadStats thisMonth / lastMonth sub-pipelines
+ *  - getMonthlyStats 6-month window ($match on createdAt)
+ *
+ * The owner prefix ensures MongoDB can scope the range scan to a single
+ * user's documents without reading the entire collection.
+ *
+ * Example query benefiting from this index:
+ *   Lead.find({ owner: userId, createdAt: { $gte: start, $lte: end } })
+ */
+leadSchema.index({ owner: 1, createdAt: -1 });
+
+/**
+ * Compound index on `owner` + `source`.
+ *
+ * Optimises source-breakdown aggregations:
+ *  - getLeadStats sourceBreakdown $group pipeline
+ *  - getLeads ?source= filter queries
+ *
+ * Example query benefiting from this index:
+ *   Lead.find({ owner: userId, source: 'LinkedIn' })
+ */
+leadSchema.index({ owner: 1, source: 1 });
+
+/**
+ * Text index on `name`, `company`, `email`.
+ *
+ * Enables fast full-text search for the searchLeads autocomplete endpoint
+ * (GET /api/leads/search?q=ali). The weights give `name` highest priority
+ * in relevance scoring.
+ *
+ * Note: $regex queries also benefit from this index on MongoDB Atlas Search;
+ * on a standard replica set the regex queries use the owner+status index
+ * for the owner filter then scan the subset — which is acceptable at
+ * the scale of a single-user CRM dataset.
+ */
+leadSchema.index(
+  { name: 'text', company: 'text', email: 'text' },
+  { weights: { name: 10, company: 5, email: 3 }, name: 'lead_text_search' }
+);
+
 // ---------------------------------------------------------------------------
 // Model & Named Exports
 // ---------------------------------------------------------------------------
