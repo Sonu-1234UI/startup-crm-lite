@@ -135,11 +135,10 @@ app.use(helmet());
  * @type {string[]}
  */
 const ALLOWED_ORIGINS = [
-  process.env.FRONTEND_URL,
-  'https://startup-crm-lite-s1is-44kwr4wcw-sonu05.vercel.app',
-  'https://startup-crm-lite-s1is.vercel.app',
-  'http://localhost:5173'
-].filter(Boolean);
+  process.env.FRONTEND_URL,          // e.g. http://localhost:5173 (dev) or https://your-app.vercel.app (prod)
+  'https://startup-crm-lite.vercel.app', // primary Vercel deployment
+  'https://your-app.vercel.app',         // replace with your actual Vercel URL
+].filter(Boolean); // Remove undefined/null entries (e.g. if FRONTEND_URL is not set)
 app.use(
   cors({
     /**
