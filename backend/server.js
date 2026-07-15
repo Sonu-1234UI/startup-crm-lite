@@ -151,9 +151,12 @@ app.use(
       // Allow requests with no Origin (curl, Postman, server-to-server).
       if (!origin) return callback(null, true);
 
-      if (ALLOWED_ORIGINS.includes(origin)) {
-        return callback(null, true);
-      }
+     if (
+  ALLOWED_ORIGINS.includes(origin) ||
+  origin.endsWith(".vercel.app")
+) {
+  return callback(null, true);
+}
 
       // Origin not in allowlist — reject with a descriptive error.
       console.warn(`🚫 CORS blocked request from origin: ${origin}`);
