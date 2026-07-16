@@ -15,7 +15,7 @@ const inputClass = (hasError) =>
 
 const LeadForm = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
-    name: '', company: '', email: '', phone: '', status: 'New', source: 'Website', value: '', owner: '',
+    name: '', company: '', email: '', phone: '', status: 'New', source: 'Website', value: '', 
   });
   const [errors, setErrors] = useState({});
 
@@ -101,11 +101,7 @@ const LeadForm = ({ initialData, onSubmit, onCancel }) => {
         </div>
       </div>
 
-      <div>
-        <label htmlFor="owner" className={labelClass}>Owner</label>
-        <input type="text" id="owner" name="owner" value={formData.owner} onChange={handleChange}
-          className={inputClass(false)} placeholder="Sarah" />
-      </div>
+     
 
       <div className="mt-6 flex justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-gray-700">
         <button type="button" onClick={onCancel}
